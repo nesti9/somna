@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e7">
+  <title>SOMNA — уход без лишнего</title>
+  <meta name="description" content="SOMNA — прототип магазина ежедневного ухода за кожей. Простые ритуалы, точные формулы, внимательный выбор.">
+  <style>
+    :root {
+      --paper: #f3f0e7;
+      --paper-light: #faf8f1;
+      --ink: #1c2d25;
+      --green: #30483a;
+      --olive: #68745c;
+      --sage: #dfe2d4;
+      --muted: #77796e;
+      --line: #d7d3c7;
+      --copper: #a97b54;
+      --serif: "Iowan Old Style", "Baskerville", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --sans: "Aptos", "Segoe UI", Arial, sans-serif;
+      --page: min(1460px, calc(100% - 88px));
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    body.locked { overflow: hidden; }
+    button, input { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: inherit; text-decoration: none; }
+    button { color: inherit; }
+    .announcement { min-height: 31px; display: flex; justify-content: center; align-items: center; padding: 5px 16px; background: var(--ink); color: #e7e2d5; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+    .header { position: sticky; top: 0; z-index: 20; background: rgba(243,240,231,.95); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+    .header-inner { width: var(--page); height: 83px; margin: auto; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+    .wordmark { width: fit-content; display: inline-flex; align-items: baseline; gap: 10px; }
+    .wordmark-main { font-family: var(--serif); font-size: 28px; line-height: 1; letter-spacing: -.055em; }
+    .wordmark-sub { font-size: 8px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; }
+    .nav { display: flex; align-items: center; gap: clamp(25px, 4vw, 60px); }
+    .nav a { position: relative; padding: 8px 0; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: #50594f; transition: color .2s; }
+    .nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 3px; height: 1px; background: var(--green); transition: right .25s; }
+    .nav a:hover { color: var(--ink); }
+    .nav a:hover::after { right: 0; }
+    .header-actions { justify-self: end; display: flex; align-items: center; gap: 10px; }
+    .icon-button { width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: transparent; display: inline-grid; place-items: center; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+    .icon-button:hover { background: var(--paper-light); border-color: var(--green); transform: translateY(-1px); }
+    .icon-button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .bag-button { position: relative; }
+    .bag-count { position: absolute; top: -3px; right: -3px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border-radius: 20px; color: var(--paper-light); background: var(--green); font-size: 9px; }
+    .menu-toggle { display: none; }
+    .search-panel { display: none; border-top: 1px solid var(--line); padding: 14px max(44px, calc((100% - 1460px)/2)); }
+    .search-panel.open { display: block; }
+    .search-wrap { max-width: 620px; margin-left: auto; display: flex; gap: 12px; align-items: center; }
+    .search-wrap svg { width: 18px; stroke: var(--olive); fill: none; stroke-width: 1.5; }
+    .search-wrap input { width: 100%; border: 0; outline: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 9px 0; color: var(--ink); font-size: 14px; }
+    .search-wrap input::placeholder { color: #8c8c80; }
+
+    .hero { width: var(--page); margin: 0 auto; min-height: 640px; display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(35px, 6vw, 94px); align-items: center; padding: 42px 0 62px; }
+    .hero-copy { padding: 18px 0 20px clamp(0px, 2vw, 28px); max-width: 540px; }
+    .eyebrow { display: flex; align-items: center; gap: 12px; color: var(--olive); font-size: 9px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 28px; height: 1px; flex: 0 0 auto; background: var(--copper); }
+    h1, h2, h3, p { margin-top: 0; }
+    .hero h1 { margin: 31px 0 21px; font-family: var(--serif); font-size: clamp(54px, 6.2vw, 91px); font-weight: 400; letter-spacing: -.065em; line-height: .95; }
+    .hero h1 em { color: var(--olive); font-weight: 400; }
+    .hero-lead { max-width: 420px; margin-bottom: 30px; color: #666a60; font-size: 15px; line-height: 1.85; }
+    .hero-links { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+    .button-primary { min-height: 51px; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; gap: 24px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper-light); font-size: 10px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; cursor: pointer; transition: background .2s, color .2s, transform .2s; }
+    .button-primary:hover { background: transparent; color: var(--ink); transform: translateY(-2px); }
+    .button-primary svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .hero-note { color: #787a70; font-family: var(--serif); font-size: 14px; font-style: italic; }
+    .hero-visual { position: relative; min-height: 520px; height: min(620px, 52vw); overflow: hidden; background: #d2d0c2; }
+    .hero-visual img { display: block; width: 100%; height: 100%; min-height: inherit; object-fit: cover; object-position: 62% center; }
+    .photo-label { position: absolute; left: 22px; bottom: 20px; padding: 10px 13px; color: #f4f0e7; background: rgba(25,40,31,.76); font-size: 8px; letter-spacing: .17em; text-transform: uppercase; }
+    .photo-index { position: absolute; right: 22px; top: 20px; width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid rgba(245,241,228,.7); border-radius: 50%; color: #f6f2e7; font-family: var(--serif); font-size: 13px; }
+    .hero-side-note { position: absolute; left: -39px; bottom: 68px; transform: rotate(-90deg); transform-origin: left center; color: var(--muted); font-size: 8px; letter-spacing: .2em; text-transform: uppercase; }
+
+    .benefits { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .benefits-inner { width: var(--page); margin: auto; display: grid; grid-template-columns: repeat(4,1fr); }
+    .benefit { min-height: 80px; display: flex; align-items: center; gap: 13px; padding: 10px 20px; border-right: 1px solid var(--line); }
+    .benefit:first-child { padding-left: 0; }
+    .benefit:last-child { border: 0; }
+    .benefit-num { color: var(--copper); font-family: var(--serif); font-size: 13px; font-style: italic; }
+    .benefit-text { color: #5d6258; font-size: 10px; letter-spacing: .02em; }
+
+    .catalog { width: var(--page); margin: 0 auto; padding: 112px 0 120px; }
+    .section-head { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 30px; margin-bottom: 32px; }
+    .section-kicker { margin-bottom: 14px; color: var(--olive); font-size: 9px; letter-spacing: .21em; text-transform: uppercase; }
+    .section-title { margin: 0; font-family: var(--serif); font-size: clamp(38px, 4.2vw, 61px); font-weight: 400; letter-spacing: -.055em; line-height: 1; }
+    .section-title em { color: var(--olive); font-weight: 400; }
+    .catalog-intro { max-width: 290px; margin: 0 2px 4px 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+    .catalog-toolbar { display: flex; justify-content: space-between; align-items: center; min-height: 55px; margin-bottom: 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .filters { display: flex; align-items: center; gap: 27px; }
+    .filter-btn { position: relative; padding: 10px 0; border: 0; background: transparent; color: #77796e; font-size: 10px; cursor: pointer; transition: color .2s; }
+    .filter-btn::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 3px; height: 1px; background: var(--green); transition: right .2s; }
+    .filter-btn:hover, .filter-btn.active { color: var(--ink); }
+    .filter-btn.active::after { right: 0; }
+    .item-count { color: var(--muted); font-family: var(--serif); font-size: 13px; font-style: italic; }
+    .product-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 17px; }
+    .product-card { min-width: 0; animation: reveal .35s both; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .product-visual { position: relative; overflow: hidden; aspect-ratio: 4 / 4.7; background: #d4d4c7; }
+    .product-visual img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .65s cubic-bezier(.2,.7,.1,1); }
+    .product-card:hover .product-visual img { transform: scale(1.035); }
+    .product-mark { position: absolute; left: 12px; top: 12px; padding: 8px 9px; background: rgba(243,240,231,.9); color: var(--green); font-size: 8px; letter-spacing: .15em; text-transform: uppercase; }
+    .favorite { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; border: 1px solid rgba(243,240,231,.8); border-radius: 50%; display: grid; place-items: center; background: rgba(243,240,231,.78); cursor: pointer; transition: background .2s, color .2s; }
+    .favorite svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.3; }
+    .favorite.active { color: #8f4438; background: var(--paper-light); }
+    .favorite.active svg { fill: #8f4438; }
+    .product-meta { display: flex; justify-content: space-between; align-items: center; margin: 17px 0 8px; color: var(--olive); font-size: 8px; letter-spacing: .17em; text-transform: uppercase; }
+    .product-meta span:last-child { color: #929084; }
+    .product-title { margin: 0 0 5px; font-family: var(--serif); font-size: clamp(19px, 1.7vw, 25px); font-weight: 400; letter-spacing: -.025em; line-height: 1.16; }
+    .product-description { min-height: 34px; margin-bottom: 16px; color: #818175; font-size: 10px; line-height: 1.55; }
+    .product-buy { min-height: 44px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); }
+    .price { font-family: var(--serif); font-size: 18px; }
+    .add-button { display: inline-flex; align-items: center; gap: 9px; padding: 8px 0 8px 12px; border: 0; background: transparent; color: var(--green); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+    .add-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; transition: transform .2s; }
+    .add-button:hover svg { transform: translateX(3px); }
+    .empty-state { display: none; grid-column: 1 / -1; padding: 40px 0; text-align: center; color: var(--muted); font-family: var(--serif); font-size: 20px; }
+
+    .manifesto { background: var(--green); color: var(--paper); }
+    .manifesto-inner { width: var(--page); min-height: 365px; margin: auto; display: grid; grid-template-columns: .36fr 1fr .64fr; align-items: center; gap: 28px; padding: 70px 0; }
+    .manifesto-index { align-self: start; padding-top: 6px; color: #d4c8a8; font-family: var(--serif); font-size: 15px; font-style: italic; }
+    .manifesto-text { max-width: 700px; }
+    .manifesto-text .section-kicker { color: #d1c9ad; }
+    .manifesto h2 { margin: 0; font-family: var(--serif); font-size: clamp(35px, 4vw, 58px); font-weight: 400; letter-spacing: -.05em; line-height: 1.08; }
+    .manifesto h2 em { color: #d2c4a2; font-weight: 400; }
+    .manifesto-note { justify-self: end; max-width: 205px; color: #cad1c7; font-family: var(--serif); font-size: 16px; font-style: italic; line-height: 1.55; }
+
+    .ritual { width: var(--page); margin: auto; padding: 115px 0 128px; }
+    .ritual-heading { display: flex; justify-content: space-between; align-items: end; gap: 35px; margin-bottom: 56px; }
+    .ritual-heading .section-title { max-width: 650px; }
+    .ritual-intro { max-width: 250px; margin: 0 0 3px; color: var(--muted); font-size: 11px; line-height: 1.8; }
+    .ritual-steps { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--line); }
+    .ritual-step { position: relative; min-height: 180px; padding: 25px 32px 20px 0; border-right: 1px solid var(--line); }
+    .ritual-step + .ritual-step { padding-left: 31px; }
+    .ritual-step:last-child { border-right: 0; }
+    .step-num { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; color: var(--copper); font-family: var(--serif); font-size: 15px; font-style: italic; }
+    .step-num::after { content: "↗"; color: #89907f; font-family: var(--sans); font-size: 13px; font-style: normal; }
+    .ritual-step h3 { margin-bottom: 7px; font-family: var(--serif); font-size: 25px; font-weight: 400; letter-spacing: -.03em; }
+    .ritual-step p { max-width: 275px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+
+    .newsletter { width: var(--page); margin: 0 auto 100px; padding: 34px 0; display: grid; grid-template-columns: .75fr 1fr; gap: 45px; align-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .newsletter h2 { margin: 0 0 8px; font-family: var(--serif); font-size: 31px; font-weight: 400; letter-spacing: -.04em; }
+    .newsletter p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .newsletter-form { display: flex; align-items: center; border-bottom: 1px solid var(--ink); }
+    .newsletter-form input { flex: 1; min-width: 0; padding: 14px 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 12px; }
+    .newsletter-form input::placeholder { color: #8b8b80; }
+    .newsletter-form button { padding: 14px 0 14px 18px; border: 0; background: transparent; color: var(--green); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+
+    .footer { background: #e8e5dc; border-top: 1px solid var(--line); }
+    .footer-inner { width: var(--page); margin: auto; padding: 35px 0 28px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 25px; }
+    .footer-brand .wordmark-main { font-size: 24px; }
+    .footer-copy { margin: 9px 0 0; color: var(--muted); font-size: 9px; }
+    .footer-nav { display: flex; gap: 25px; color: #5f645a; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+    .footer-right { justify-self: end; color: var(--muted); font-family: var(--serif); font-size: 13px; font-style: italic; }
+    .prototype-note { padding: 11px 20px 15px; text-align: center; color: #858579; font-size: 8px; letter-spacing: .05em; }
+
+    .drawer-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(24,34,28,.35); opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .drawer-scrim.open { opacity: 1; pointer-events: auto; }
+    .cart-drawer { position: fixed; z-index: 41; top: 0; right: 0; bottom: 0; width: min(430px, 100%); padding: 27px 28px; display: flex; flex-direction: column; background: var(--paper-light); transform: translateX(102%); transition: transform .34s cubic-bezier(.2,.75,.2,1); }
+    .cart-drawer.open { transform: translateX(0); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+    .drawer-head h2 { margin: 0; font-family: var(--serif); font-size: 30px; font-weight: 400; }
+    .drawer-close { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; font-size: 19px; cursor: pointer; }
+    .cart-items { flex: 1; overflow: auto; padding: 9px 0; }
+    .cart-empty { margin: 34px 0; color: var(--muted); font-family: var(--serif); font-size: 19px; line-height: 1.5; }
+    .cart-row { display: grid; grid-template-columns: 70px 1fr auto; gap: 13px; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--line); }
+    .cart-row img { width: 70px; height: 84px; object-fit: cover; }
+    .cart-row h3 { margin: 0 0 5px; font-family: var(--serif); font-size: 17px; font-weight: 400; }
+    .cart-row p { margin: 0; color: var(--muted); font-size: 10px; }
+    .cart-row-price { align-self: start; padding-top: 3px; font-family: var(--serif); font-size: 14px; white-space: nowrap; }
+    .cart-qty { display: inline-flex; align-items: center; gap: 10px; margin-top: 11px; border: 1px solid var(--line); }
+    .cart-qty button { width: 25px; height: 25px; border: 0; background: transparent; cursor: pointer; }
+    .cart-qty span { min-width: 10px; text-align: center; font-size: 10px; }
+    .cart-footer { padding-top: 19px; border-top: 1px solid var(--line); }
+    .cart-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+    .cart-total span:first-child { color: var(--muted); font-size: 11px; }
+    .cart-total strong { font-family: var(--serif); font-size: 23px; font-weight: 400; }
+    .cart-checkout { width: 100%; }
+    .toast { position: fixed; z-index: 60; left: 50%; bottom: 26px; padding: 13px 19px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--paper-light); font-size: 11px; letter-spacing: .04em; transition: transform .22s, opacity .22s; }
+    .toast.show { transform: translate(-50%,0); opacity: 1; }
+
+    @media (max-width: 980px) {
+      :root { --page: calc(100% - 48px); }
+      .header-inner { grid-template-columns: 1fr auto; }
+      .nav { position: absolute; top: 82px; left: 0; right: 0; padding: 20px 24px 24px; display: none; align-items: flex-start; flex-direction: column; gap: 9px; background: var(--paper); border-bottom: 1px solid var(--line); }
+      .nav.open { display: flex; }
+      .nav a { font-size: 11px; }
+      .menu-toggle { display: inline-grid; }
+      .hero { grid-template-columns: .9fr 1.1fr; gap: 28px; min-height: 570px; }
+      .hero h1 { font-size: clamp(50px, 7vw, 70px); }
+      .hero-visual { min-height: 440px; height: 54vw; }
+      .product-grid { grid-template-columns: repeat(2,1fr); row-gap: 38px; column-gap: 18px; }
+      .manifesto-inner { grid-template-columns: 45px 1fr .5fr; }
+      .ritual-step h3 { font-size: 22px; }
+    }
+    @media (max-width: 640px) {
+      :root { --page: calc(100% - 36px); }
+      .announcement { font-size: 8px; letter-spacing: .13em; }
+      .header-inner { height: 69px; }
+      .wordmark-main { font-size: 25px; }
+      .wordmark-sub { display: none; }
+      .header-actions { gap: 6px; }
+      .icon-button { width: 37px; height: 37px; }
+      .menu-toggle { order: 3; }
+      .nav { top: 68px; padding: 18px; }
+      .search-panel { padding: 10px 18px; }
+      .hero { width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 28px; padding: 45px 0 0; }
+      .hero-copy { width: var(--page); margin: auto; padding: 0 0 4px; }
+      .hero h1 { max-width: 500px; margin: 23px 0 16px; font-size: clamp(54px, 13.5vw, 78px); }
+      .hero-lead { max-width: 390px; margin-bottom: 22px; font-size: 13px; line-height: 1.75; }
+      .button-primary { min-height: 47px; padding: 0 17px; gap: 14px; font-size: 9px; }
+      .hero-note { font-size: 12px; }
+      .hero-visual { min-height: 420px; height: 112vw; max-height: 590px; }
+      .hero-visual img { object-position: 63% center; }
+      .hero-side-note { display: none; }
+      .photo-label { left: 13px; bottom: 13px; font-size: 7px; }
+      .photo-index { right: 13px; top: 13px; width: 39px; height: 39px; font-size: 11px; }
+      .benefits-inner { grid-template-columns: repeat(2,1fr); }
+      .benefit { min-height: 64px; padding: 10px 6px; gap: 9px; border-bottom: 1px solid var(--line); }
+      .benefit:nth-child(2) { border-right: 0; }
+      .benefit:nth-child(n+3) { border-bottom: 0; }
+      .benefit:first-child { padding-left: 0; }
+      .benefit-text { font-size: 9px; line-height: 1.4; }
+      .catalog { padding: 78px 0 82px; }
+      .section-head { grid-template-columns: 1fr; gap: 13px; margin-bottom: 22px; }
+      .section-kicker { margin-bottom: 10px; font-size: 8px; }
+      .section-title { font-size: clamp(38px, 10.3vw, 52px); }
+      .catalog-intro { max-width: 340px; font-size: 11px; }
+      .catalog-toolbar { margin-bottom: 15px; overflow: hidden; }
+      .filters { max-width: calc(100% - 45px); gap: 20px; overflow-x: auto; scrollbar-width: none; }
+      .filters::-webkit-scrollbar { display: none; }
+      .filter-btn { white-space: nowrap; font-size: 9px; }
+      .item-count { font-size: 12px; }
+      .product-grid { gap: 28px 11px; }
+      .product-visual { aspect-ratio: 4 / 5; }
+      .product-mark { left: 7px; top: 7px; padding: 6px 6px; font-size: 6px; letter-spacing: .1em; }
+      .favorite { right: 7px; top: 7px; width: 30px; height: 30px; }
+      .favorite svg { width: 15px; height: 15px; }
+      .product-meta { margin: 12px 0 6px; gap: 6px; font-size: 7px; letter-spacing: .11em; }
+      .product-title { min-height: 44px; margin-bottom: 3px; font-size: 18px; }
+      .product-description { min-height: 32px; margin-bottom: 8px; font-size: 9px; }
+      .product-buy { min-height: 39px; }
+      .price { font-size: 16px; }
+      .add-button { gap: 5px; font-size: 7px; letter-spacing: .09em; }
+      .add-button svg { width: 13px; }
+      .manifesto-inner { width: var(--page); min-height: 0; display: block; padding: 53px 0 57px; }
+      .manifesto-index { margin-bottom: 21px; font-size: 13px; }
+      .manifesto h2 { font-size: 41px; }
+      .manifesto-note { max-width: 270px; margin: 25px 0 0 auto; font-size: 14px; }
+      .ritual { padding: 79px 0 82px; }
+      .ritual-heading { display: block; margin-bottom: 34px; }
+      .ritual-intro { margin-top: 15px; }
+      .ritual-steps { grid-template-columns: 1fr; }
+      .ritual-step, .ritual-step + .ritual-step { min-height: 135px; padding: 18px 0 19px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .ritual-step:last-child { border-bottom: 0; }
+      .step-num { margin-bottom: 13px; }
+      .ritual-step h3 { margin-bottom: 4px; font-size: 22px; }
+      .ritual-step p { max-width: 100%; }
+      .newsletter { margin-bottom: 65px; padding: 27px 0; grid-template-columns: 1fr; gap: 18px; }
+      .newsletter h2 { font-size: 28px; }
+      .footer-inner { padding: 28px 0 20px; grid-template-columns: 1fr auto; align-items: start; }
+      .footer-nav { grid-column: 1 / -1; grid-row: 2; gap: 15px; flex-wrap: wrap; font-size: 8px; }
+      .footer-right { font-size: 12px; }
+      .prototype-note { padding: 7px 18px 13px; font-size: 7px; line-height: 1.5; }
+      .cart-drawer { padding: 23px 19px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="announcement">SOMNA · ДОСТАВКА ОТ 6 000 ₽ — ЗА НАШ СЧЁТ</div>
+  <header class="header">
+    <div class="header-inner">
+      <a class="wordmark" href="#top" aria-label="SOMNA — на главную">
+        <span class="wordmark-main">SOMNA</span><span class="wordmark-sub">лаборатория ухода</span>
+      </a>
+      <nav class="nav" id="main-nav" aria-label="Основная навигация">
+        <a href="#catalog">Средства</a>
+        <a href="#ritual">Ритуал</a>
+        <a href="#about">О подходе</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-button" id="search-toggle" aria-label="Поиск" title="Поиск">
+          <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16 16 4.3 4.3"/></svg>
+        </button>
+        <button class="icon-button bag-button" id="bag-toggle" aria-label="Открыть корзину">
+          <svg viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11h-13L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+          <span class="bag-count" id="bag-count">0</span>
+        </button>
+        <button class="icon-button menu-toggle" id="menu-toggle" aria-label="Открыть меню" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="search-panel" id="search-panel">
+      <label class="search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16 16 4.3 4.3"/></svg>
+        <input id="search-input" type="search" placeholder="Найти средство или ритуал…" autocomplete="off">
+      </label>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="eyebrow">Формулы на каждый день</div>
+        <h1 id="hero-title">Кожа любит<br><em>простое.</em></h1>
+        <p class="hero-lead">Короткий ритуал, выверенные текстуры и формулы, которые легко вписать в обычный день.</p>
+        <div class="hero-links">
+          <a class="button-primary" href="#catalog">Смотреть средства <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></a>
+          <span class="hero-note">начните с малого</span>
+        </div>
+      </div>
+      <figure class="hero-visual">
+        <img src="assets/somna-hero.png" alt="Сыворотка и крем SOMNA на каменной полке в тёплом вечернем свете">
+        <span class="photo-index">01</span>
+        <figcaption class="photo-label">тихий уход · линия 01</figcaption>
+      </figure>
+      <span class="hero-side-note">care, with intention · 2026</span>
+    </section>
+
+    <section class="benefits" aria-label="Принципы магазина">
+      <div class="benefits-inner">
+        <div class="benefit"><span class="benefit-num">01</span><span class="benefit-text">Понятная ежедневная схема</span></div>
+        <div class="benefit"><span class="benefit-num">02</span><span class="benefit-text">Продуманные текстуры</span></div>
+        <div class="benefit"><span class="benefit-num">03</span><span class="benefit-text">Спокойный выбор без перегруза</span></div>
+        <div class="benefit"><span class="benefit-num">04</span><span class="benefit-text">Доставка от 6 000 ₽ бесплатно</span></div>
+      </div>
+    </section>
+
+    <section class="catalog" id="catalog" aria-labelledby="catalog-title">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Линия 01 · базовый уход</div>
+          <h2 class="section-title" id="catalog-title">Четыре шага.<br><em>Ничего лишнего.</em></h2>
+        </div>
+        <p class="catalog-intro">Средства, которые работают вместе: от первого прикосновения воды до последнего слоя увлажнения.</p>
+      </div>
+      <div class="catalog-toolbar">
+        <div class="filters" role="group" aria-label="Фильтр товаров">
+          <button class="filter-btn active" data-filter="all">Все средства</button>
+          <button class="filter-btn" data-filter="cleanse">Очищение</button>
+          <button class="filter-btn" data-filter="serum">Сыворотки</button>
+          <button class="filter-btn" data-filter="moisturize">Увлажнение</button>
+        </div>
+        <span class="item-count" id="item-count">04 позиции</span>
+      </div>
+      <div class="product-grid" id="product-grid">
+        <article class="product-card" data-id="serum" data-category="serum" data-name="сыворотка тихая вода">
+          <div class="product-visual"><img src="assets/serum.png" alt="Янтарный флакон сыворотки на каменной поверхности"><span class="product-mark">бестселлер</span><button class="favorite" aria-label="Добавить сыворотку в избранное"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11a4.7 4.7 0 0 1 8.8-2.1 4.7 4.7 0 0 1 8.8 2.1Z"/></svg></button></div>
+          <div class="product-meta"><span>концентрат · 30 мл</span><span>01 / 04</span></div>
+          <h3 class="product-title">Сыворотка «Тихая вода»</h3>
+          <p class="product-description">Лёгкий завершающий слой для утреннего ритуала.</p>
+          <div class="product-buy"><span class="price">3 490 ₽</span><button class="add-button" data-add="serum">В корзину <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></button></div>
+        </article>
+        <article class="product-card" data-id="cleanser" data-category="cleanse" data-name="молочко для умывания очищение">
+          <div class="product-visual"><img src="assets/cleanser.png" alt="Флакон молочка для очищения из матового стекла"><span class="product-mark">первый шаг</span><button class="favorite" aria-label="Добавить молочко в избранное"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11a4.7 4.7 0 0 1 8.8-2.1 4.7 4.7 0 0 1 8.8 2.1Z"/></svg></button></div>
+          <div class="product-meta"><span>мягкое очищение · 150 мл</span><span>02 / 04</span></div>
+          <h3 class="product-title">Молочко для умывания</h3>
+          <p class="product-description">Нежная текстура для начала дня и снятия усталости.</p>
+          <div class="product-buy"><span class="price">2 490 ₽</span><button class="add-button" data-add="cleanser">В корзину <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></button></div>
+        </article>
+        <article class="product-card" data-id="cream" data-category="moisturize" data-name="крем эмульсия увлажнение">
+          <div class="product-visual"><img src="assets/cream.png" alt="Матовая баночка крема цвета слоновой кости на каменном подиуме"><span class="product-mark">ежедневно</span><button class="favorite" aria-label="Добавить крем в избранное"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11a4.7 4.7 0 0 1 8.8-2.1 4.7 4.7 0 0 1 8.8 2.1Z"/></svg></button></div>
+          <div class="product-meta"><span>восстановление · 50 мл</span><span>03 / 04</span></div>
+          <h3 class="product-title">Крем-эмульсия «Пауза»</h3>
+          <p class="product-description">Мягкое увлажнение без ощущения тяжёлого слоя.</p>
+          <div class="product-buy"><span class="price">3 190 ₽</span><button class="add-button" data-add="cream">В корзину <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></button></div>
+        </article>
+        <article class="product-card" data-id="essence" data-category="serum" data-name="эссенция медленный свет мист">
+          <div class="product-visual"><img src="assets/essence.png" alt="Стеклянный флакон эссенции с золотистым настоем"><span class="product-mark">новинка</span><button class="favorite" aria-label="Добавить эссенцию в избранное"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11a4.7 4.7 0 0 1 8.8-2.1 4.7 4.7 0 0 1 8.8 2.1Z"/></svg></button></div>
+          <div class="product-meta"><span>эссенция · 100 мл</span><span>04 / 04</span></div>
+          <h3 class="product-title">Эссенция «Медленный свет»</h3>
+          <p class="product-description">Освежающий слой между очищением и кремом.</p>
+          <div class="product-buy"><span class="price">2 890 ₽</span><button class="add-button" data-add="essence">В корзину <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></button></div>
+        </article>
+        <div class="empty-state" id="empty-state">Ничего не найдено. Попробуйте другое название.</div>
+      </div>
+    </section>
+
+    <section class="manifesto" id="about">
+      <div class="manifesto-inner">
+        <div class="manifesto-index">SOMNA / 01</div>
+        <div class="manifesto-text">
+          <div class="section-kicker">Философия ухода</div>
+          <h2>Не больше обещаний.<br><em>Больше внимания к себе.</em></h2>
+        </div>
+        <p class="manifesto-note">Хороший ритуал не усложняет день. Он возвращает ему собственный ритм.</p>
+      </div>
+    </section>
+
+    <section class="ritual" id="ritual" aria-labelledby="ritual-title">
+      <div class="ritual-heading">
+        <div>
+          <div class="section-kicker">Три минуты · утро или вечер</div>
+          <h2 class="section-title" id="ritual-title">Соберите свой<br><em>ритм ухода.</em></h2>
+        </div>
+        <p class="ritual-intro">Не нужно начинать со всего сразу. Три простых действия — уже полноценная забота о себе.</p>
+      </div>
+      <div class="ritual-steps">
+        <article class="ritual-step"><div class="step-num">шаг 01</div><h3>Очистить</h3><p>Начните с мягкого очищения и дайте коже время проснуться.</p></article>
+        <article class="ritual-step"><div class="step-num">шаг 02</div><h3>Поддержать</h3><p>Добавьте сыворотку или эссенцию — ровно столько, сколько нужно сегодня.</p></article>
+        <article class="ritual-step"><div class="step-num">шаг 03</div><h3>Завершить</h3><p>Закройте ритуал кремом и возвращайтесь к своему дню.</p></article>
+      </div>
+    </section>
+
+    <section class="newsletter" aria-labelledby="newsletter-title">
+      <div><h2 id="newsletter-title">Письма без шума.</h2><p>Небольшие заметки об уходе, новых формулах и ритуалах.</p></div>
+      <form class="newsletter-form" id="newsletter-form"><input type="email" aria-label="Ваш email" placeholder="Ваш email" required><button type="submit">Остаться на связи ↗</button></form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand"><a class="wordmark" href="#top"><span class="wordmark-main">SOMNA</span></a><p class="footer-copy">Уход без лишнего · прототип магазина</p></div>
+      <nav class="footer-nav" aria-label="Ссылки внизу страницы"><a href="#catalog">Каталог</a><a href="#ritual">Ритуал</a><a href="mailto:hello@somna.example">Контакты</a></nav>
+      <div class="footer-right">© SOMNA, 2026</div>
+    </div>
+    <div class="prototype-note">Демонстрационный прототип: товары, цены, доставка и формы условные.</div>
+  </footer>
+
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Корзина" aria-hidden="true">
+    <div class="drawer-head"><h2>Ваша корзина</h2><button class="drawer-close" id="drawer-close" aria-label="Закрыть корзину">×</button></div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-footer"><div class="cart-total"><span>Итого</span><strong id="cart-total">0 ₽</strong></div><button class="button-primary cart-checkout" id="checkout">Перейти к оформлению <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></button></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const products = {
+      serum: { name: 'Сыворотка «Тихая вода»', size: '30 мл', price: 3490, image: 'assets/serum.png' },
+      cleanser: { name: 'Молочко для умывания', size: '150 мл', price: 2490, image: 'assets/cleanser.png' },
+      cream: { name: 'Крем-эмульсия «Пауза»', size: '50 мл', price: 3190, image: 'assets/cream.png' },
+      essence: { name: 'Эссенция «Медленный свет»', size: '100 мл', price: 2890, image: 'assets/essence.png' }
+    };
+    const cart = new Map();
+    const grid = document.getElementById('product-grid');
+    const cards = [...document.querySelectorAll('.product-card')];
+    const filterButtons = [...document.querySelectorAll('.filter-btn')];
+    const searchInput = document.getElementById('search-input');
+    const searchPanel = document.getElementById('search-panel');
+    const drawer = document.getElementById('cart-drawer');
+    const scrim = document.getElementById('drawer-scrim');
+    const toast = document.getElementById('toast');
+    let activeFilter = 'all';
+    let toastTimer;
+
+    function formatPrice(value) { return new Intl.NumberFormat('ru-RU').format(value) + ' ₽'; }
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2100);
+    }
+    function setDrawer(open) {
+      drawer.classList.toggle('open', open);
+      scrim.classList.toggle('open', open);
+      drawer.setAttribute('aria-hidden', String(!open));
+      document.body.classList.toggle('locked', open);
+      if (open) document.getElementById('drawer-close').focus();
+    }
+    function refreshCart() {
+      const itemCount = [...cart.values()].reduce((sum, quantity) => sum + quantity, 0);
+      document.getElementById('bag-count').textContent = itemCount;
+      const target = document.getElementById('cart-items');
+      if (!itemCount) {
+        target.innerHTML = '<p class="cart-empty">Здесь пока тихо.<br>Добавьте средство из каталога.</p>';
+      } else {
+        target.innerHTML = [...cart.entries()].map(([id, quantity]) => {
+          const item = products[id];
+          return `<article class="cart-row"><img src="${item.image}" alt=""><div><h3>${item.name}</h3><p>${item.size}</p><div class="cart-qty"><button data-qty="${id}" data-step="-1" aria-label="Уменьшить количество">−</button><span>${quantity}</span><button data-qty="${id}" data-step="1" aria-label="Увеличить количество">+</button></div></div><div class="cart-row-price">${formatPrice(item.price * quantity)}</div></article>`;
+        }).join('');
+      }
+      const total = [...cart.entries()].reduce((sum, [id, quantity]) => sum + products[id].price * quantity, 0);
+      document.getElementById('cart-total').textContent = formatPrice(total);
+      document.getElementById('checkout').disabled = !itemCount;
+      document.getElementById('checkout').style.opacity = itemCount ? '1' : '.55';
+    }
+    function applyFilters() {
+      const query = searchInput.value.trim().toLocaleLowerCase('ru');
+      let visible = 0;
+      cards.forEach(card => {
+        const matchFilter = activeFilter === 'all' || card.dataset.category === activeFilter;
+        const matchSearch = !query || card.dataset.name.includes(query) || card.querySelector('.product-title').textContent.toLocaleLowerCase('ru').includes(query);
+        const show = matchFilter && matchSearch;
+        card.hidden = !show;
+        if (show) visible++;
+      });
+      document.getElementById('item-count').textContent = `${String(visible).padStart(2,'0')} ${visible === 1 ? 'позиция' : 'позиции'}`;
+      document.getElementById('empty-state').style.display = visible ? 'none' : 'block';
+    }
+
+    filterButtons.forEach(button => button.addEventListener('click', () => {
+      filterButtons.forEach(item => item.classList.toggle('active', item === button));
+      activeFilter = button.dataset.filter;
+      applyFilters();
+    }));
+    document.querySelectorAll('[data-add]').forEach(button => button.addEventListener('click', () => {
+      const id = button.dataset.add;
+      cart.set(id, (cart.get(id) || 0) + 1);
+      refreshCart();
+      showToast('Добавили в корзину');
+    }));
+    document.querySelectorAll('.favorite').forEach(button => button.addEventListener('click', () => {
+      const isActive = button.classList.toggle('active');
+      button.setAttribute('aria-pressed', String(isActive));
+      showToast(isActive ? 'Сохранили в избранное' : 'Убрали из избранного');
+    }));
+    document.getElementById('bag-toggle').addEventListener('click', () => setDrawer(true));
+    document.getElementById('drawer-close').addEventListener('click', () => setDrawer(false));
+    scrim.addEventListener('click', () => setDrawer(false));
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') setDrawer(false); });
+    document.getElementById('cart-items').addEventListener('click', event => {
+      const button = event.target.closest('[data-qty]');
+      if (!button) return;
+      const id = button.dataset.qty;
+      const next = (cart.get(id) || 0) + Number(button.dataset.step);
+      if (next <= 0) cart.delete(id); else cart.set(id, next);
+      refreshCart();
+    });
+    document.getElementById('checkout').addEventListener('click', () => showToast('Оформление заказа — демонстрационный сценарий'));
+    document.getElementById('search-toggle').addEventListener('click', () => {
+      const open = searchPanel.classList.toggle('open');
+      if (open) searchInput.focus();
+    });
+    searchInput.addEventListener('input', applyFilters);
+    document.getElementById('menu-toggle').addEventListener('click', event => {
+      const nav = document.getElementById('main-nav');
+      const open = nav.classList.toggle('open');
+      event.currentTarget.setAttribute('aria-expanded', String(open));
+    });
+    document.querySelectorAll('#main-nav a').forEach(link => link.addEventListener('click', () => {
+      document.getElementById('main-nav').classList.remove('open');
+      document.getElementById('menu-toggle').setAttribute('aria-expanded', 'false');
+    }));
+    document.getElementById('newsletter-form').addEventListener('submit', event => {
+      event.preventDefault();
+      event.currentTarget.reset();
+      showToast('Спасибо — подписка сохранена в демо-режиме');
+    });
+    refreshCart();
+  </script>
+</body>
+</html>
