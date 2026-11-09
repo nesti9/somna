@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1c3328">
   <title>SOMNA — уход без лишнего</title>
-  <meta name="description" content="SOMNA — прототип магазина ежедневного ухода за кожей. Простые ритуалы, точные формулы, внимательный выбор.">
+  <meta name="description" content="SOMNA — магазин ежедневного ухода за кожей. Простые ритуалы, точные формулы, внимательный выбор.">
   <style>
     @font-face { font-family: "Inter"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/Inter-Regular.woff") format("woff"); }
     @font-face { font-family: "Inter"; font-weight: 500; font-style: normal; font-display: swap; src: url("fonts/Inter-Medium.woff") format("woff"); }
@@ -453,7 +453,7 @@
           <a class="button-primary" href="#catalog">Смотреть средства <svg viewBox="0 0 20 20"><path d="M3 10h13M10 4l6 6-6 6"/></svg></a>
           <span class="hero-note">начните с малого</span>
         </div>
-        <span class="hero-side-note">care, with intention · 2026</span>
+        <span class="hero-side-note">care, with intention · 2025</span>
       </div>
       <figure class="hero-visual" id="hero-visual">
         <img src="assets/somna-hero.png" alt="Сыворотка и крем SOMNA на каменной полке в тёплом вечернем свете">
@@ -561,9 +561,9 @@
 
   <footer class="footer">
     <div class="footer-inner">
-      <div class="footer-brand"><a class="wordmark" href="#top"><span class="wordmark-main">SOMNA</span></a><p class="footer-copy">Уход без лишнего · прототип магазина</p></div>
+      <div class="footer-brand"><a class="wordmark" href="#top"><span class="wordmark-main">SOMNA</span></a><p class="footer-copy">Уход без лишнего · </p></div>
       <nav class="footer-nav" aria-label="Ссылки внизу страницы"><a href="#catalog">Каталог</a><a href="#ritual">Ритуал</a><a href="mailto:hello@somna.example">Контакты</a></nav>
-      <div class="footer-right">© SOMNA, 2026</div>
+      <div class="footer-right">© SOMNA, 2025</div>
     </div>
     <div class="prototype-note">Демонстрационный прототип: товары, цены, доставка и формы условные.</div>
     <div class="giant" id="giant" aria-hidden="true">SOMNA</div>
@@ -686,7 +686,7 @@
       if (next <= 0) cart.delete(id); else cart.set(id, next);
       refreshCart();
     });
-    document.getElementById('checkout').addEventListener('click', () => showToast('Оформление заказа — демонстрационный сценарий'));
+    document.getElementById('checkout').addEventListener('click', () => showToast('Оформление заказа.'));
     document.getElementById('search-toggle').addEventListener('click', () => {
       const open = searchPanel.classList.toggle('open');
       if (open) searchInput.focus();
